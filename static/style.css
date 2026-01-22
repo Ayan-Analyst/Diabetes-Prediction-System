@@ -1,0 +1,5 @@
+const angle = (risk / 100) * 180 - 90;
+document.getElementById("needle").setAttribute(
+    "transform",
+    `rotate(${angle} 180 170)`
+);

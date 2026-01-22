@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Diabetes Prediction System</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f4f7fb;
+    color: #2c3e50;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(90deg, #0b3c6f, #0e5aa7);
+    color: white;
+    padding: 18px 40px;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+/* Layout */
+.container {
+    display: flex;
+    gap: 30px;
+    padding: 30px 40px;
+}
+
+/* Left Panel */
+.left-panel {
+    width: 35%;
+    background: #f2f2f2;
+    padding: 28px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+
+.left-panel h2 {
+    margin-bottom: 18px;
+}
+
+/* Inputs */
+label {
+    font-weight: 600;
+    margin-top: 12px;
+    display: block;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    border-radius: 6px;
+    border: 1px solid #cfd8dc;
+    font-size: 15px;
+}
+
+/* Button */
+button {
+    width: 100%;
+    margin-top: 22px;
+    padding: 14px;
+    background: linear-gradient(90deg, #5a9e0f, #3d7f0c);
+    color: white;
+    font-size: 17px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.95;
+}
+
+/* Right Panel */
+.right-panel {
+    width: 65%;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.07);
+}
+
+/* Result Banner */
+.result-box {
+    background: #6b8e23;
+    color: white;
+    padding: 16px;
+    font-size: 22px;
+    font-weight: 700;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* Risk text */
+#riskText {
+    margin-top: 12px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Gauge */
+.gauge-container {
+    margin-top: 35px;
+    display: flex;
+    justify-content: center;
+}
+
+.gauge-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">Diabetes Prediction System</div>
+
+<div class="container">
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+        <h2>Patient Details</h2>
+
+        <label>Age</label>
+        <input type="number" id="age" value="45">
+
+        <label>Sex</label>
+        <select id="sex">
+            <option value="0">Female</option>
+            <option value="1">Male</option>
+        </select>
+
+        <label>Pregnancies (Female only)</label>
+        <input type="number" id="preg" value="1">
+
+        <label>Glucose</label>
+        <input type="number" id="glucose" value="130">
+
+        <label>Blood Pressure</label>
+        <input type="number" id="bp" value="70">
+
+        <label>Insulin</label>
+        <input type="number" id="insulin" value="129">
+
+        <label>BMI</label>
+        <input type="number" id="bmi" value="29">
+
+        <button onclick="predict()">Predict Diabetes</button>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+
+        <div class="result-box" id="result">
+            Result will appear here
+        </div>
+
+        <!-- SVG GAUGE -->
+        <div class="gauge-container">
+            <svg width="360" height="190" viewBox="0 0 360 190">
+                
+                <!-- Low -->
+                <path d="M20 170 A160 160 0 0 1 140 30"
+                      fill="none" stroke="#2ecc71" stroke-width="28"/>
+                
+                <!-- Moderate -->
+                <path d="M140 30 A160 160 0 0 1 220 30"
+                      fill="none" stroke="#f1c40f" stroke-width="28"/>
+
+                <!-- High -->
+                <path d="M220 30 A160 160 0 0 1 340 170"
+                      fill="none" stroke="#e74c3c" stroke-width="28"/>
+
+                <!-- Needle -->
+                <line id="needle"
+                      x1="180" y1="170"
+                      x2="180" y2="50"
+                      stroke="black"
+                      stroke-width="4"
+                      transform="rotate(-90 180 170)"
+                      style="transition: transform 1s ease-out"/>
+
+                <circle cx="180" cy="170" r="6" fill="#333"/>
+            </svg>
+        </div>
+
+        <div class="gauge-labels">
+            <span style="color:#2ecc71">Low</span>
+            <span style="color:#f1c40f">Moderate</span>
+            <span style="color:#e74c3c">High</span>
+        </div>
+
+        <div id="riskText">Risk Level: --</div>
+
+    </div>
+</div>
+
+<script>
+function predict() {
+
+    // TEMP DEMO VALUE
+    // Replace with Flask fetch() when backend is connected
+    let glucose = document.getElementById("glucose").value;
+    let bmi = document.getElementById("bmi").value;
+
+    let risk = Math.min(100, Math.max(0, glucose * 0.4 + bmi * 1.5));
+
+    // Needle rotation (-90 to +90)
+    const angle = (risk / 100) * 180 - 90;
+    document.getElementById("needle")
+        .setAttribute("transform", `rotate(${angle} 180 170)`);
+
+    let label = "Low Risk";
+    let resultText = "Non-Diabetic";
+
+    if (risk >= 30 && risk < 60) {
+        label = "Moderate Risk";
+        resultText = "Pre-Diabetic";
+    }
+    if (risk >= 60) {
+        label = "High Risk";
+        resultText = "Diabetic";
+    }
+
+    document.getElementById("result").innerHTML =
+        `${resultText} (${Math.round(risk)}%)`;
+
+    document.getElementById("riskText").innerHTML =
+        `Risk Level: <b>${label}</b>`;
+}
+</script>
+
+</body>
+</html>
